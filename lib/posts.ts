@@ -3,10 +3,11 @@ import path from "path";
 import matter from "gray-matter";
 import remark from "remark";
 import html from "remark-html";
+import { Post } from "../types/posts";
 
 const postsDirectory = path.join(process.cwd(), "posts");
 
-export function getSortedPostsData() {
+export const getSortedPostsData = (): Post[] => {
   // Get file names under /posts
   const fileNames = fs.readdirSync(postsDirectory);
   const allPostsData = fileNames.map((fileName) => {
@@ -26,8 +27,9 @@ export function getSortedPostsData() {
       ...matterResult.data,
     };
   });
+
   // Sort posts by date
-  return allPostsData.sort(({ date: a }, { date: b }) => {
+  return (allPostsData as Post[]).sort(({ date: a }, { date: b }) => {
     if (a < b) {
       return 1;
     } else if (a > b) {
@@ -36,24 +38,11 @@ export function getSortedPostsData() {
       return 0;
     }
   });
-}
+};
 
-export function getAllPostIds() {
+export const getAllPostIds = (): { params: { id: string } }[] => {
   const fileNames = fs.readdirSync(postsDirectory);
 
-  // Returns an array that looks like this:
-  // [
-  //   {
-  //     params: {
-  //       id: 'ssg-ssr'
-  //     }
-  //   },
-  //   {
-  //     params: {
-  //       id: 'pre-rendering'
-  //     }
-  //   }
-  // ]
   return fileNames.map((fileName) => {
     return {
       params: {
@@ -61,9 +50,11 @@ export function getAllPostIds() {
       },
     };
   });
-}
+};
 
-export async function getPostData(id) {
+export const getPostData = async (
+  id: string | string[]
+): Promise<Post & { contentHtml: string }> => {
   const fullPath = path.join(postsDirectory, `${id}.md`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
 
@@ -82,4 +73,4 @@ export async function getPostData(id) {
     contentHtml,
     ...matterResult.data,
   };
-}
+};
